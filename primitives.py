@@ -47,6 +47,16 @@ class matrix:
 				raise Exception("Not a matrix, row length not equal")
 		return len(self.matrix), row_length
 	
+	def transpose(self):
+		M_size = self.dimension
+		result = []
+		for i in range(M_size[1]):
+			row = []
+			for j in range(M_size[0]):
+				row.append(self.matrix[j][i])
+			result.append(row)
+		return result
+	
 	def __mul__(self, obj):
 		if isinstance(obj, (int,float)):
 			result = self.matrix
@@ -61,9 +71,24 @@ class matrix:
 				i+=1
 			result = vector(result[0], result[1], result[2])
 		elif isinstance(obj, matrix):
-			#print("need to implement, teehee")
-			pass
-			#todo
+			print(self)
+			M_size = self.dimension
+			N_size = obj.dimension
+			result = []
+			N_T = obj.transpose()
+			if M_size[0] == N_size[1]:
+				for i in range(M_size[1]):
+					row = []
+					for j in range(N_size[0]):
+						r = self.matrix[i]
+						c = N_T[j]
+						s = 0
+						for k in range(len(r)):
+							s += r[k]*c[k]
+						row.append(s)
+					result.append(row)
+			else:
+				raise Exception("Can't multiply matrices, row M =/= column N")
 		return result
 
 
@@ -105,19 +130,8 @@ class vector:
 		return vector(-self.a, -self.b, -self.c)
 	
 	#remember, all rotations are anti-clockwise
-	def rotate_yaw(self, angle):
-		return vector(
-			cos(angle)*self.a - sin(angle)*self.b,
-			sin(angle)*self.a + cos(angle)*self.b,
-			self.c
-			)
-	
-	def rotate_pitch(self, angle):
-		return vector(
-			cos(angle)*self.a  + sin(angle)*self.c,
-			self.b,
-			-sin(angle)*self.a + cos(angle)*self.c
-			)
+	def rotate(self, alpha, beta, gamma):
+		pass
 
 class vector_2p(vector):
 	def __init__(self, A, B):

@@ -63,9 +63,9 @@ class camera(ray):
 class box:
 	def __init__(self, position, u, v, w):
 		self.position = position
-		self.u = u
-		self.v = v
-		self.w = w
+		self.u = vector(1,0,0) * u
+		self.v = vector(0,1,0) * v
+		self.w = vector(0,0,1) * w
 		self.calculate_triangles()
 	
 	def calculate_triangles(self):
@@ -130,9 +130,9 @@ class room(box):
 
 
 
-box = box(vertex(0,20,0), vector(10,1,0),vector(0,10,0),vector(1,0,10))
+box = box(vertex(0,20,0), 10,10,10)
 #tri = tri(vertex(-1,1,0),vertex(1,1,0),vertex(0,1,1), (110,110,0))
-camera = camera(vertex(0,0,0), vector(0,1,0), 120, (480,480), vector(1,0,0))
+camera = camera(vertex(0,0,0), vector(0,1,0), 120, (48,48), vector(1,0,0))
 pixels = camera.cast_rays()
 array = np.array(pixels, dtype=np.uint8)
 
