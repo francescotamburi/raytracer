@@ -71,7 +71,6 @@ class matrix:
 				i+=1
 			result = vector(result[0], result[1], result[2])
 		elif isinstance(obj, matrix):
-			print(self)
 			M_size = self.dimension
 			N_size = obj.dimension
 			result = []
@@ -87,6 +86,7 @@ class matrix:
 							s += r[k]*c[k]
 						row.append(s)
 					result.append(row)
+				result = matrix(result)
 			else:
 				raise Exception("Can't multiply matrices, row M =/= column N")
 		return result
@@ -131,7 +131,40 @@ class vector:
 	
 	#remember, all rotations are anti-clockwise
 	def rotate(self, alpha, beta, gamma):
-		pass
+		alpha = math.radians(alpha)
+		beta  = math.radians(beta)
+		gamma = math.radians(gamma)
+		rotation_matrices = []
+		R = matrix(((1,0,0),(0,1,0),(0,0,1)))
+		if alpha != 0:
+			rotation_matrices.append(
+				matrix((
+					(math.cos(alpha), -math.sin(alpha), 0),
+					(math.sin(alpha),  math.cos(alpha), 0),
+					(              0,                0, 1)
+				))
+			)
+		if beta != 0:
+			rotation_matrices.append(
+				matrix((
+					( math.cos(beta), 0, math.sin(beta)),
+					(              0, 1,              0),
+					(-math.sin(beta), 0, math.cos(beta))
+				))
+			)
+		if gamma != 0:
+			rotation_matrices.append(
+				matrix((
+					( 1,               0,                0),
+					( 0, math.cos(gamma), -math.sin(gamma)),
+					( 0, math.sin(gamma),  math.cos(gamma))
+				))
+			)	
+		
+		for M in rotation_matrices:
+			R = M * R
+		
+		return(R*self)
 
 class vector_2p(vector):
 	def __init__(self, A, B):

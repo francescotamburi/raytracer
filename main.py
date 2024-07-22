@@ -67,6 +67,7 @@ class box:
 		self.v = vector(0,1,0) * v
 		self.w = vector(0,0,1) * w
 		self.calculate_triangles()
+		objects.append(self)
 	
 	def calculate_triangles(self):
 		A = self.position
@@ -83,6 +84,7 @@ class box:
 		CDA = triangle(C,D,A, (250,250,0))
 		CDA.normal = -self.w.normalize()
 		
+		"""
 		CBG = triangle(C,B,G, (0,250,0))
 		CBG.normal = self.u.normalize()
 		CGH = triangle(C,G,H, (0,250,250))
@@ -107,10 +109,16 @@ class box:
 		ABF.normal = -self.v.normalize()
 		BGF = triangle(B,G,F, (100,125,250))
 		BGF.normal = -self.v.normalize()
+		"""
 		
-		self.triangles = [ABC,CDA,CBG,CGH,EGH,EGF,EDF,ADF,CHD,EDH,ABF,BGF]
-		
-		objects.append(self)
+		self.triangles = [ABC,CDA]#,CBG,CGH,EGH,EGF,EDF,ADF,CHD,EDH,ABF,BGF]
+	
+	def rotate(self,a,b,c):
+		self.u = self.u.rotate(a,b,c)
+		self.v = self.v.rotate(a,b,c)
+		self.w = self.w.rotate(a,b,c)
+		#print(self.u.components(), self.v.components(),self.w.components())
+		self.calculate_triangles()
 
 class tri:
 	def __init__(self, A,B,C, colour):
@@ -131,8 +139,9 @@ class room(box):
 
 
 box = box(vertex(0,20,0), 10,10,10)
+#box.rotate(0,0,90)
 #tri = tri(vertex(-1,1,0),vertex(1,1,0),vertex(0,1,1), (110,110,0))
-camera = camera(vertex(0,0,0), vector(0,1,0), 120, (48,48), vector(1,0,0))
+camera = camera(vertex(0,0,0), vector(0,1,0), 120, (480,480), vector(1,0,0))
 pixels = camera.cast_rays()
 array = np.array(pixels, dtype=np.uint8)
 
