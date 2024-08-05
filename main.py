@@ -31,8 +31,8 @@ class camera(ray):
 		return self.vector
 	
 	def cast_rays(self):
-		self.ray_vector += self.x_shift*int(self.resolution[0]/2)
-		self.ray_vector += self.y_shift*int(self.resolution[1]/2)
+		self.ray_vector -= self.x_shift*int(self.resolution[0]/2)
+		self.ray_vector -= self.y_shift*int(self.resolution[1]/2)
 		global start
 		start = self.ray_vector.components()
 		new_screen = []
@@ -45,7 +45,7 @@ class camera(ray):
 					for triangle in obj.triangles:
 						if distance := self.intersection(triangle):
 							intersected_triangles.append((triangle, distance))
-				self.ray_vector -= self.x_shift
+				self.ray_vector += self.x_shift
 				intersected_triangles.sort(key= lambda x:x[1]) #sort by distance
 				#take closest triangle
 				if intersected_triangles:
@@ -53,8 +53,8 @@ class camera(ray):
 					pixel = surface.get_colour()
 				new_row.append(pixel)
 			new_screen.append(new_row)
-			self.ray_vector += self.x_shift*int(self.resolution[0])
-			self.ray_vector += -self.y_shift
+			self.ray_vector += -self.x_shift*int(self.resolution[0])
+			self.ray_vector += self.y_shift
 		self.screen = new_screen
 		global end
 		end = self.ray_vector.components()
@@ -71,53 +71,61 @@ class box:
 	
 	def calculate_triangles(self):
 		A = self.position
+		print("A = ", A.coordinates()) 
 		B = A.translate(self.u)
-		C = B.translate(self.v)
+		print("B = ", B.coordinates())
+		C = B.translate(self.w)
+		print("C = ", C.coordinates())
 		D = C.translate(-self.u)
-		E = D.translate(self.w)
-		F = E.translate(-self.v)
+		print("D = ", D.coordinates())
+		
+		
+		E = D.translate(self.v)
+		print("E = ", E.coordinates())
+		F = E.translate(-self.w)
+		print("F = ", F.coordinates())
 		G = F.translate(self.u)
-		H = G.translate(self.v)
+		print("G = ", G.coordinates())
+		H = G.translate(self.w)
+		print("H = ", H.coordinates())
 		
-		ABC = triangle(A,B,C, (250,0,0))
-		ABC.normal = -self.w.normalize()
-		CDA = triangle(C,D,A, (250,250,0))
-		CDA.normal = -self.w.normalize()
+		ABC = triangle(A,B,C, (100,100,100))
+		#ABC.normal = -self.v.normalize()
+		CDA = triangle(C,D,A, (255,255,255))
+		#CDA.normal = -self.v.normalize()
 		
-		"""
-		CBG = triangle(C,B,G, (0,250,0))
-		CBG.normal = self.u.normalize()
-		CGH = triangle(C,G,H, (0,250,250))
-		CGH.normal = self.u.normalize()
+		CBG = triangle(C,B,G, (100,  0,  0))
+		#CBG.normal = self.u.normalize()
+		CGH = triangle(C,G,H, (255,  0,  0))
+		#CGH.normal = self.u.normalize()
 		
-		EGH = triangle(E,G,H, (0, 0, 250))
-		EGH.normal = self.w.normalize()
-		EGF = triangle(E,G,F, (250, 0, 250))
-		EGF.normal = self.w.normalize()
+		EHG = triangle(E,H,G, (  0,  0,100))
+		#EHG.normal = self.v.normalize()
+		EGF = triangle(E,G,F, (  0,  0,255))
+		#EGF.normal = self.v.normalize()
 		
-		EDF = triangle(E,D,F, (250,250,250))
-		EDF.normal = -self.u.normalize()
-		ADF = triangle(A,D,F, (250,125,250))
-		ADF.normal = -self.u.normalize()
+		EFD = triangle(E,F,D, (  0,100,  0))
+		#EFD.normal = -self.u.normalize()
+		ADF = triangle(A,D,F, (  0,255,  0))
+		#ADF.normal = -self.u.normalize()
 		
-		CHD = triangle(C,H,D, (250,125,150))
-		CHD.normal = self.v.normalize()
-		EDH = triangle(C,D,A, (20,125,250))
-		EDH.normal = self.v.normalize()
+		CHD = triangle(C,H,D, (255,  0,255))
+		#CHD.normal = self.w.normalize()
+		EDH = triangle(E,D,H, (100,  0,100))
+		#EDH.normal = self.w.normalize()
 		
-		ABF = triangle(A,B,F, (250,125,0))
-		ABF.normal = -self.v.normalize()
-		BGF = triangle(B,G,F, (100,125,250))
-		BGF.normal = -self.v.normalize()
-		"""
+		BAF = triangle(B,A,F, (100,100,  0))
+		#BAF.normal = -self.w.normalize()
+		BFG = triangle(B,F,G, (255,255,  0))
+		#BFG.normal = -self.w.normalize()
 		
-		self.triangles = [ABC,CDA]#,CBG,CGH,EGH,EGF,EDF,ADF,CHD,EDH,ABF,BGF]
+		self.triangles = [ABC,CDA,CBG,CGH,EHG,EGF,EFD,ADF,CHD,EDH,BAF,BFG]
 	
 	def rotate(self,a,b,c):
 		self.u = self.u.rotate(a,b,c)
 		self.v = self.v.rotate(a,b,c)
 		self.w = self.w.rotate(a,b,c)
-		#print(self.u.components(), self.v.components(),self.w.components())
+		print(self.u.components(), self.v.components(),self.w.components())
 		self.calculate_triangles()
 
 class tri:
@@ -138,10 +146,11 @@ class room(box):
 
 
 
-box = box(vertex(0,20,0), 10,10,10)
-#box.rotate(0,0,90)
+box = box(vertex(0,8,0), 10,10,10)
+box.rotate(0,0,45)
+#print(box.u.components(), box.v.components(), box.w.components())
 #tri = tri(vertex(-1,1,0),vertex(1,1,0),vertex(0,1,1), (110,110,0))
-camera = camera(vertex(0,0,0), vector(0,1,0), 120, (480,480), vector(1,0,0))
+camera = camera(vertex(-10,0,-10), vector(0,1,0), 120, (480,480), vector(1,0,0))
 pixels = camera.cast_rays()
 array = np.array(pixels, dtype=np.uint8)
 

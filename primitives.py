@@ -134,37 +134,31 @@ class vector:
 		alpha = math.radians(alpha)
 		beta  = math.radians(beta)
 		gamma = math.radians(gamma)
-		rotation_matrices = []
-		R = matrix(((1,0,0),(0,1,0),(0,0,1)))
+		rotated_vector = vector(self.a, self.b, self.c)
+		
 		if alpha != 0:
-			rotation_matrices.append(
-				matrix((
-					(math.cos(alpha), -math.sin(alpha), 0),
-					(math.sin(alpha),  math.cos(alpha), 0),
-					(              0,                0, 1)
+			R = matrix((
+					(               1,               0,               0),
+					(               0, math.cos(alpha),-math.sin(alpha)),
+					(               0, math.sin(alpha), math.cos(alpha))
 				))
-			)
+			rotated_vector = R * rotated_vector
 		if beta != 0:
-			rotation_matrices.append(
-				matrix((
-					( math.cos(beta), 0, math.sin(beta)),
-					(              0, 1,              0),
-					(-math.sin(beta), 0, math.cos(beta))
+			R = matrix((
+					( math.cos(beta),              0, math.sin(beta)),
+					(              0,              1,              0),
+					(-math.sin(beta),              0, math.cos(beta))
 				))
-			)
+			rotated_vector = R * rotated_vector
 		if gamma != 0:
-			rotation_matrices.append(
-				matrix((
-					( 1,               0,                0),
-					( 0, math.cos(gamma), -math.sin(gamma)),
-					( 0, math.sin(gamma),  math.cos(gamma))
+			R = matrix((
+					( math.cos(gamma),-math.sin(gamma),               0),
+					( math.sin(gamma), math.cos(gamma),               0),
+					(               0,               0,               1)
 				))
-			)	
+			rotated_vector = R * rotated_vector
 		
-		for M in rotation_matrices:
-			R = M * R
-		
-		return(R*self)
+		return(rotated_vector)
 
 class vector_2p(vector):
 	def __init__(self, A, B):
@@ -177,6 +171,7 @@ class triangle:
 		self.A = A
 		self.B = B
 		self.C = C
+		#print("A, B, C = ", self.A.coordinates(), self.B.coordinates(), self.C.coordinates())
 		self.normal()
 		self.colour = colour
 	
@@ -203,6 +198,7 @@ class ray:
 			#print("facing different directions")
 			##print(self.ray_vector.components(), triangle.normal.components(), dot(self.ray_vector, triangle.normal))
 			return False
+
 		if True:
 			#plane-ray intersection
 			D = triangle.normal.dot(vector_2p(origin,triangle.A))
@@ -215,6 +211,7 @@ class ray:
 			plane_intersection = origin.translate(self.ray_vector * t)
 			#print("plane_intersection: ", plane_intersection.coordinates())
 			
+			"""
 			##print("__________")
 			AB = vector_2p(triangle.A, triangle.B)
 			##print(AB.components())
@@ -257,6 +254,4 @@ class ray:
 					
 				else:
 					return t  #idr what this does , vector(APB, APC, triangle.area - APB + APC) * triangle_area**-1	
-			"""
-			
 			
