@@ -43,10 +43,11 @@ class camera(ray):
 				intersected_triangles = []
 				for obj in objects:
 					for triangle in obj.triangles:
-						if distance := self.intersection(triangle):
-							intersected_triangles.append((triangle, distance))
+						if tuv := self.intersection(triangle):
+							intersected_triangles.append((triangle, tuv))
 				self.ray_vector += self.x_shift
-				intersected_triangles.sort(key= lambda x:x[1]) #sort by distance
+				#print(intersected_triangles)
+				intersected_triangles.sort(key= lambda x:x[1][0]) #sort by distance
 				#take closest triangle
 				if intersected_triangles:
 					surface = intersected_triangles[0][0]
@@ -146,11 +147,11 @@ class room(box):
 
 
 
-box = box(vertex(0,8,0), 10,10,10)
+box = box(vertex(0,0,0), 10,10,10)
 box.rotate(0,0,45)
 #print(box.u.components(), box.v.components(), box.w.components())
 #tri = tri(vertex(-1,1,0),vertex(1,1,0),vertex(0,1,1), (110,110,0))
-camera = camera(vertex(-10,0,-10), vector(0,1,0), 120, (480,480), vector(1,0,0))
+camera = camera(vertex(2,-15,2), vector(0,1,0), 60, (720,480), vector(1,0,0))
 pixels = camera.cast_rays()
 array = np.array(pixels, dtype=np.uint8)
 
@@ -158,3 +159,11 @@ array = np.array(pixels, dtype=np.uint8)
 #print((vector(1,2,3)+vector(1,3,2)).components())
 new_image = Image.fromarray(array)
 new_image.save('new.png')
+
+"""
+a = vector(1,1,1)
+b = vector(2,2,2)
+c = vector(3,3,3)
+
+print(matrix_col((a,b,c)).matrix)
+"""

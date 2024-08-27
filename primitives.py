@@ -20,6 +20,9 @@ def triangle_area(A,B,C):
 	abc = cross(vector_2p(B,A), vector_2p(C,A))
 	return magnitude(abc[0], abc[1], abc[2])/2
 
+def det(M):
+	return M.determinant()
+
 class vertex:
 	def __init__(self, x, y, z):
 		self.x = x
@@ -39,6 +42,19 @@ class matrix:
 	def __init__(self, matrix):
 		self.matrix = matrix
 		self.dimension = self.dimension()
+	
+	def determinant(self):
+		if self.dimension == (2,2):
+			return self.matrix[0][0] * self.matrix[1][1] - self.matrix[0][1] * self.matrix[1][0]
+		elif self.dimension == (3,3):
+			a,b,c = self.matrix[0]
+			d,e,f = self.matrix[1]
+			g,h,i = self.matrix[2]
+			return a*e*i + b*f*g + c*d*h - c*e*g - b*d*i - a*f*h
+		elif self.dimension[1] == self.dimension[2]:
+			raise Exception("To implement: determinant of matrix w/ size > 3x3")
+		else:
+			raise Exception("Non-square matrix, cannot calculate determinant")
 	
 	def dimension(self):
 		row_length = len(self.matrix[0])
@@ -91,6 +107,14 @@ class matrix:
 				raise Exception("Can't multiply matrices, row M =/= column N")
 		return result
 
+class matrix_row(matrix):
+	def __init__(self, rowlist):
+		self.matrix = [[v.a, v.b, v.c] for v in rowlist]
+		self.dimension = self.dimension()
+
+def matrix_col(col_list):
+	M = matrix_row(col_list)
+	return matrix(M.transpose())
 
 class vector:
 	def __init__(self, a, b, c):
@@ -182,8 +206,9 @@ class triangle:
 		u = vector_2p(self.A,self.B)
 		v = vector_2p(self.A,self.C)
 		cross_product = u.cross(v)
-		self.area = cross_product.magnitude()/2 
-		self.normal = cross_product.normalize()
+		#self.area = cross_product.magnitude()/2 
+		#self.normal = cross_product.normalize()
+		self.normal = cross_product
 	
 	def get_colour(self, **kwargs):
 		return self.colour
@@ -200,6 +225,7 @@ class ray:
 			return False
 
 		if True:
+			"""
 			#plane-ray intersection
 			D = triangle.normal.dot(vector_2p(origin,triangle.A))
 			t = -(triangle.normal.dot(vector_2p(origin,self.point)) + D)/triangle.normal.dot(self.ray_vector)
@@ -210,7 +236,41 @@ class ray:
 				
 			plane_intersection = origin.translate(self.ray_vector * t)
 			#print("plane_intersection: ", plane_intersection.coordinates())
+			"""
 			
+			#Möller-Trumbore:
+			
+			OA = vector_2p(self.point, triangle.A)
+			BA = vector_2p(triangle.B, triangle.A)
+			CA = vector_2p(triangle.C, triangle.A)
+			
+			#P = self.ray_vector.cross(CA)
+			#Q = OA.cross(BA)
+			
+			#tuv = vector(Q.dot(BA),P.dot(OA),Q.dot(self.ray_vector)) * (1/(P.dot(BA)))
+			
+			#t, u, v = tuv.components()
+			
+			denominator = det(matrix_col((-self.ray_vector.normalize(),BA,CA)))
+			
+			#if denominator <= 0:
+			#	return False
+			
+			u = det(matrix_col((-self.ray_vector.normalize(),OA,CA))) / denominator
+			if u > 1 or u < 0:
+				#print("fail u", u)
+				return False
+			
+			v = det(matrix_col((-self.ray_vector.normalize(), BA, OA))) / denominator
+			if u + v > 1 or v < 0:
+				#print("fail v")
+				return False
+			
+			t = det(matrix_col((OA, BA, CA))) / denominator
+			if t < 0:
+				return False
+			
+			return t, u, v
 			"""
 			##print("__________")
 			AB = vector_2p(triangle.A, triangle.B)
@@ -238,7 +298,7 @@ class ray:
 				#print("yes")
 				return t
 			
-			"""
+			
 			#barycentric coordinates
 			APC = triangle_area(triangle.A, triangle.C, plane_intersection)
 			if APC > triangle.area:
@@ -254,4 +314,4 @@ class ray:
 					
 				else:
 					return t  #idr what this does , vector(APB, APC, triangle.area - APB + APC) * triangle_area**-1	
-			
+			"""
